@@ -56,7 +56,7 @@ public class CalculatorController {
     public String getVariable(Authentication authentication, @PathVariable String varName){
         String currentUserName = authentication.getName();
         Variable result = billingDao.getVariable(currentUserName, varName);
-        return result.toString();
+        return result.toString()+"\n";
     }
 
     @RequestMapping(path = "/var/{varName}", method = RequestMethod.DELETE, produces = "text/plain")

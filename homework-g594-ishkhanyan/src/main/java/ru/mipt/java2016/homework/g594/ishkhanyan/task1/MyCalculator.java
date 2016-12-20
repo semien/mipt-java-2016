@@ -1,14 +1,13 @@
 package ru.mipt.java2016.homework.g594.ishkhanyan.task1;
 
 
-import ru.mipt.java2016.homework.base.task1.Calculator;
+import java.util.HashMap;
+import java.util.Stack;
 import ru.mipt.java2016.homework.base.task1.ParsingException;
 
-import java.util.Stack;
 
-
-class MyCalculator implements Calculator {
-    MyCalculator() {
+public class MyCalculator {
+    public MyCalculator() {
     }
 
     private boolean isDelim(char c) { //check that the symbol is delimiter
@@ -33,9 +32,9 @@ class MyCalculator implements Calculator {
                 return 2;
             case '/':
                 return 2;
-            case 'm':
+            case '~':
                 return 3;
-            case 'p':
+            case '#':
                 return 3;
             default:
                 return -1;
@@ -43,40 +42,17 @@ class MyCalculator implements Calculator {
     }
 
     private double getVal(String str) throws ParsingException { // convert string >> double
-        double result = 0;
-        int points = 0;
-        int pos = str.length();
-        if (str.charAt(0) == '.' || str.charAt(str.length() - 1) == '.') {
-            throw new ParsingException("Number error");
-        }
-        for (int i = 0; i < str.length(); ++i) {
-            if (str.charAt(i) == '.') {
-                ++points;
-                pos = i;
-            }
-        }
-        if (points > 1) {
-            throw new ParsingException("Number error");
-        }
-        for (int i = 0; i < str.length(); ++i) {
-            if (pos > i) {
-                result += (str.charAt(i) - '0') * Math.pow(10, (pos - i - 1));
-            }
-            if (pos < i) {
-                result += (str.charAt(i) - '0') * Math.pow(10, (pos - i));
-            }
-        }
-        return result;
+        return Double.parseDouble(str);
     }
 
     private void doOper(Stack<Double> numbers, char op) { //do 1 operation from stack
-        if (op == 'm' || op == 'p') {
+        if (op == '#' || op == '~') {
             double l = numbers.pop();
             switch (op) {
-                case 'p':
+                case '#':
                     numbers.push(l);
                     break;
-                case 'm':
+                case '~':
                     numbers.push(-l);
                     break;
                 default:
@@ -105,16 +81,42 @@ class MyCalculator implements Calculator {
         }
     }
 
-    public double calculate(String exp) throws ParsingException {
+    public double calculate(String exp, HashMap<String, Double> vars) throws ParsingException {
         boolean mayUnary = true; //wait unary operation
         int numberAfterOp = 0; //how many numbers were after last operation
         int brackbalnce = 0;
         if (exp == null || exp.length() == 0) {
             throw new ParsingException("empty expression");
         }
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0; i<exp.length(); ++i){
+            int max = 0;
+            Double val = new Double(0);
+
+            for(String var : vars.keySet()){
+                int length = var.length();
+                if(i+length<=exp.length()){
+                    if(exp.substring(i,i+length).equals(var) && length>max){
+                        val = vars.get(var);
+                        max = length;
+                    }
+                }
+            }
+
+            if(max != 0){
+                i+=max-1;
+                builder.append(val.toString());
+            }else{
+                builder.append(exp.charAt(i));
+            }
+        }
+
+        exp = builder.toString();
+
         Stack<Double> numbers = new Stack<>();
         Stack<Character> oper = new Stack<>();
         for (int i = 0; i < exp.length(); ++i) {
+
             if (isDelim(exp.charAt(i))) {
                 continue;
             }
@@ -148,10 +150,10 @@ class MyCalculator implements Calculator {
                 if (mayUnary) {
                     switch (currentOp) {
                         case '+':
-                            currentOp = 'p'; //unaryPlus
+                            currentOp = '#'; //unaryPlus
                             break;
                         case '-':
-                            currentOp = 'm'; //unaryMinus
+                            currentOp = '~'; //unaryMinus
                             break;
                         default:
                             throw new ParsingException("Illegal sequence");
@@ -171,10 +173,10 @@ class MyCalculator implements Calculator {
                     case '-':
                         mayUnary = false;
                         break;
-                    case 'p':
+                    case '#':
                         mayUnary = false;
                         break;
-                    case 'm':
+                    case '~':
                         mayUnary = false;
                         break;
 

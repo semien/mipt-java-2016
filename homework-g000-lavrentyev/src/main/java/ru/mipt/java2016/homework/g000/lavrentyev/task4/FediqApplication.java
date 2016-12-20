@@ -22,7 +22,6 @@ import ru.mipt.java2016.homework.g000.lavrentyev.task1.CachedJEvalCalculator;
 @Configuration
 @ComponentScan(basePackageClasses = FediqApplication.class)
 public class FediqApplication {
-
     @Bean
     public Calculator calculator() {
         return CachedJEvalCalculator.INSTANCE;
